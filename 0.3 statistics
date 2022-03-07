@@ -1,0 +1,119 @@
+#Throughput Time
+from pm4py.objects.log.importer.xes import importer as xes_importer
+
+log = xes_importer.apply("running-example.xes")
+#to retrieve the list of all the durations of the cases (expressed in seconds)
+from pm4py.statistics.traces.generic.log import case_statistics
+all_case_durations = case_statistics.get_all_casedurations(log1, parameters={
+    case_statistics.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+    
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe12 = log_converter.apply(log1, variant=log_converter.Variants.TO_DATA_FRAME)
+dataframe12
+
+#there are 6 cases. each case starts from registeration request until pay compantion or reject or reinitiate the process.
+all_case_durations
+
+#the median case duration 
+from pm4py.statistics.traces.generic.log import case_statistics
+median_case_duration = case_statistics.get_median_caseduration(log1, parameters={
+    case_statistics.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+
+median_case_duration
+
+#Case Arrival/Dispersion Ratio
+from pm4py.statistics.traces.generic.log import case_arrival
+case_arrival_ratio = case_arrival.get_case_arrival_avg(log1, parameters={
+    case_arrival.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+case_arrival_ratio   
+#The average distance between the finishing of two consecutive cases in the log.
+from pm4py.statistics.traces.generic.log import case_arrival
+case_dispersion_ratio = case_arrival.get_case_dispersion_avg(log, parameters={
+    case_arrival.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+    
+case_dispersion_ratio 
+#Performance Spectrum
+
+import pm4py
+import os
+
+log2 = pm4py.read_xes(os.path.join("Receipt.xes"))
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe = log_converter.apply(log2, variant=log_converter.Variants.TO_DATA_FRAME)
+
+pm4py.view_performance_spectrum(log2, ["Confirmation of receipt", "T04 Determine confirmation of receipt",
+                                     "T10 Determine necessity to stop indication"], format="jpg")
+                                    
+#Business Hours 
+#Given a start and end timestamp (expressed as UNIX timestamps), 
+#the business hours calculation method could be called as follows:
+from pm4py.util.business_hours import BusinessHours
+from datetime import datetime
+
+st = datetime.fromtimestamp(100000000)
+et = datetime.fromtimestamp(200000000)
+bh_object = BusinessHours(st, et)
+worked_time = bh_object.getseconds()
+print(worked_time)
+                       
+#To provide specific shifts and weekends (for example, 
+#always short weeks with 4 working days and work days 
+#from 10 to 16) the following code could be used:
+bh_object = BusinessHours(st, et, worktiming=[10, 16], weekends=[5, 6, 7])
+worked_time = bh_object.getseconds()
+print(worked_time)
+
+#Cycle Time and Waiting Time
+
+from pm4py.objects.log.util import interval_lifecycle
+enriched_log = interval_lifecycle.assign_lead_cycle_time(log)
+
+import pm4py
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
+
+pm4py.view_dotted_chart(log2, format="png")
+#Events Distribution
+pm4py.view_events_distribution_graph(log, distr_type="days_week", format="png")
+
+#Log-Model Evaluation
+#Replay Fitness
+
+from pm4py.algo.evaluation.replay_fitness import algorithm as replay_fitness_evaluator
+fitness = replay_fitness_evaluator.apply(log, net, im, fm, variant=replay_fitness_evaluator.Variants.TOKEN_BASED)
+
+#Generalization
+from pm4py.algo.evaluation.generalization import algorithm as generalization_evaluator
+gen = generalization_evaluator.apply(log, net, im, fm)
+
+#Simplicity
+from pm4py.algo.evaluation.simplicity import algorithm as simplicity_evaluator
+simp = simplicity_evaluator.apply(net)
+
+#Earth Mover Distance
+from pm4py.objects.log.importer.xes import importer as xes_importer
+from pm4py.statistics.variants.log import get as variants_module
+language = variants_module.get_language(log)
+print(language)
+
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
