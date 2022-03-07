@@ -1,0 +1,76 @@
+!Pip install pm4py
+import warnings
+warnings.filterwarnings("ignore")
+from pm4py.objects.log.importer.xes import importer as xes_importer
+log = xes_importer.apply('D:/power points/process mining/codeData process mining/running-example.xes')
+
+# set some attribute (https://pm4py.fit.fraunhofer.de/documentation#item-convert-logs)
+from pm4py.objects.log.importer.xes import importer as xes_importer
+variant = xes_importer.Variants.ITERPARSE
+parameters = {variant.value.Parameters.TIMESTAMP_SORT: True}
+log = xes_importer.apply('D:/power points/process mining/codeData process mining/running-example.xes',
+                        variant=variant, parameters=parameters)
+                        
+#Convert event log to csv
+
+import pandas as pd
+# this section DO NOT write any thing in csv file (Book1)
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
+dataframe.to_csv('D:/power points/process mining/codeData process mining/Book1.csv')
+                                
+# Exporting logs to CSV
+# this section write the data to csv file Book1
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
+dataframe.to_csv('D:/power points/process mining/codeData process mining/Book1.csv')
+
+#Convert csv to event log file
+# the converter converts the dataframe to an Event Log object. 
+import pandas as pd
+from pm4py.objects.log.util import dataframe_utils
+from pm4py.objects.conversion.log import converter as log_converter
+
+log_csv = pd.read_csv('D:/power points/process mining/codeData process mining/Detail_Incident_Activity.csv', sep=',')
+log_csv = dataframe_utils.convert_timestamp_columns_in_df(log_csv)
+log_csv = log_csv.sort_values('DateStamp')
+event_log = log_converter.apply(log_csv)
+log_csv.head(10)
+
+type(log_csv)# log_csv type is dataframe
+type(event_log)# log_csv file is converted to event log by apply() function
+
+#Export xes file
+from pm4py.objects.log.exporter.xes import exporter as xes_exporter
+xes_exporter.apply(log, 'D:/power points/process mining/codeData process mining/createdfile.xes')
+
+#Filter & Map Functions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
