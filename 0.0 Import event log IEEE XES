@@ -2,13 +2,13 @@
 import warnings
 warnings.filterwarnings("ignore")
 from pm4py.objects.log.importer.xes import importer as xes_importer
-log = xes_importer.apply('D:/power points/process mining/codeData process mining/running-example.xes')
+log = xes_importer.apply('running-example.xes')
 
 # set some attribute (https://pm4py.fit.fraunhofer.de/documentation#item-convert-logs)
 from pm4py.objects.log.importer.xes import importer as xes_importer
 variant = xes_importer.Variants.ITERPARSE
 parameters = {variant.value.Parameters.TIMESTAMP_SORT: True}
-log = xes_importer.apply('D:/power points/process mining/codeData process mining/running-example.xes',
+log = xes_importer.apply('running-example.xes',
                         variant=variant, parameters=parameters)
                         
 #Convert event log to csv
@@ -18,14 +18,14 @@ import pandas as pd
 import pandas as pd
 from pm4py.objects.conversion.log import converter as log_converter
 dataframe = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
-dataframe.to_csv('D:/power points/process mining/codeData process mining/Book1.csv')
+dataframe.to_csv('Book1.csv')
                                 
 # Exporting logs to CSV
 # this section write the data to csv file Book1
 import pandas as pd
 from pm4py.objects.conversion.log import converter as log_converter
 dataframe = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
-dataframe.to_csv('D:/power points/process mining/codeData process mining/Book1.csv')
+dataframe.to_csv('Book1.csv')
 
 #Convert csv to event log file
 # the converter converts the dataframe to an Event Log object. 
@@ -33,7 +33,7 @@ import pandas as pd
 from pm4py.objects.log.util import dataframe_utils
 from pm4py.objects.conversion.log import converter as log_converter
 
-log_csv = pd.read_csv('D:/power points/process mining/codeData process mining/Detail_Incident_Activity.csv', sep=',')
+log_csv = pd.read_csv('Detail_Incident_Activity.csv', sep=',')
 log_csv = dataframe_utils.convert_timestamp_columns_in_df(log_csv)
 log_csv = log_csv.sort_values('DateStamp')
 event_log = log_converter.apply(log_csv)
@@ -44,18 +44,74 @@ type(event_log)# log_csv file is converted to event log by apply() function
 
 #Export xes file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
-xes_exporter.apply(log, 'D:/power points/process mining/codeData process mining/createdfile.xes')
+xes_exporter.apply(log, 'createdfile.xes')
 
 #Filter & Map Functions
+import pm4py
 
+log = pm4py.read_xes('running-example.xes')
+for t in log:
+    print(len(t))
+    
+long_traces = pm4py.filter_log(lambda t: len(t) > 5, log)
+for t in long_traces:
+    print(len(t))
+   
+short_traces = pm4py.filter_log(lambda t: len(t) <= 5, log)
+for t in short_traces:
+    print(len(t))
+    
+print(type(long_traces))
+print(type(long_traces[0]))
 
+#Pre-Built Event Log Filters
+import pm4py
+import datetime as dt
+log = pm4py.read_xes('running-example.xes')
 
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+#dataframe1 = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
+#dataframe1.to_csv('Book2.csv')
 
+#Filter Start Activities
+#This function filters the given event log object based on a given set of 
+#input activity names that need to occur at the starting point of a trace
+filtered = pm4py.filter_start_activities(dataframe, {'register request'},retain=True)
 
+#Filter End Activities
+filtered = pm4py.filter_end_activities(dataframe, {'pay compensation'})
 
+#filter_trace_attribute_values
+filtered = pm4py.filter_trace_attribute_values(log, 'concept:name', {'3', '4'})
 
+import pandas as pd
+from pm4py.objects.conversion.log import converter as log_converter
+dataframe6 = log_converter.apply(filtered, variant=log_converter.Variants.TO_DATA_FRAME)
 
+#filter event attribute values
+filtered = pm4py.filter_event_attribute_values(dataframe, 'org:resource', {'Pete', 'Mike'}, level='event')
 
+#filter variants
+filtered = pm4py.filter_variants(dataframe, [
+    ['register request', 'check ticket', 'examine casually', 'decide', 'pay compensation']])
+filtered    
+dataframe
+#filter time range
+filtered = pm4py.filter_time_range(dataframe, dt.datetime(2010, 12, 30), dt.datetime(2010, 12, 31), mode='events')
+
+#Filter on case performance
+# traces between 1 and 10 days are kept acording to second.(event log file)
+from pm4py.algo.filtering.log.cases import case_filter
+filtered_log = case_filter.filter_case_performance(log, 86400, 864000)
+
+# for dataframe
+from pm4py.algo.filtering.pandas.cases import case_filter
+df_cases = case_filter.filter_case_performance(dataframe, min_case_performance=86400, max_case_performance=864000,
+                                          parameters={case_filter.Parameters.CASE_ID_KEY: "case:concept:name",
+                                                      case_filter.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+
+df_cases
 
 
 
